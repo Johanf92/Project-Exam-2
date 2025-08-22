@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getVenues } from "../lib/venues";
 
 export default function Home() {
@@ -11,6 +12,11 @@ export default function Home() {
   const apiKey = localStorage.getItem("apiKey");
 
   useEffect(() => {
+    if (!accessToken || !apiKey) {
+      setErr("Please login to view venues.");
+      setLoading(false);
+      return;
+    }
     let cancel = false;
     (async () => {
       try {
@@ -26,40 +32,46 @@ export default function Home() {
     return () => {
       cancel = true;
     };
-  }, [q]);
+  }, [q, accessToken, apiKey]);
 
   if (loading) return <div className="p-6">Loading venues…</div>;
   if (err) return <div className="p-6 text-red-500">{err}</div>;
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <input
-        className="border border-white/20 bg-black/40 text-white px-3 py-2 rounded w-full mb-4"
-        placeholder="Search venues…"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-      />
+      <div className="flex gap-2 mb-4">
+        <input
+          className="flex-1 border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
+          placeholder="Search venues…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {venues.map((v) => (
-          <article
+          <Link
+            to={`/venue/${v.id}`}
             key={v.id}
-            className="border border-white/10 rounded-lg p-4 bg-white/5"
+            className="border border-white/10 rounded-lg overflow-hidden bg-white/5 hover:border-white/20"
           >
             <img
               src={
                 v.media?.[0]?.url || "https://placehold.co/600x400?text=Venue"
               }
               alt={v.media?.[0]?.alt || v.name}
-              className="rounded mb-3 w-full aspect-video object-cover"
+              className="w-full aspect-video object-cover"
             />
-            <h3 className="font-semibold">{v.name}</h3>
-            <p className="text-sm text-white/70 line-clamp-3">
-              {v.description}
-            </p>
-            <div className="mt-2 text-sm">
-              Max guests: {v.maxGuests} • Price: {v.price}
+            <div className="p-4">
+              <h3 className="font-semibold">{v.name}</h3>
+              <div className="mt-1 text-sm text-white/70 line-clamp-2">
+                {v.description}
+              </div>
+              <div className="mt-2 text-sm">
+                Guests: {v.maxGuests} • Price: {v.price}
+              </div>
             </div>
-          </article>
+          </Link>
         ))}
       </div>
     </div>
