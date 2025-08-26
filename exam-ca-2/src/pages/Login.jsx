@@ -23,6 +23,9 @@ export default function Login() {
       const apiKey = keyResp?.data?.key;
       localStorage.setItem("apiKey", apiKey);
 
+      // ✅ Notify Navbar and others immediately that auth changed
+      window.dispatchEvent(new Event("auth:changed"));
+
       nav("/"); // go to Home
     } catch (e) {
       setErr(e.message || "Login failed");
