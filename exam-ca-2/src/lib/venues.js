@@ -56,3 +56,17 @@ export function getVenueById({
     headers: authHeaders({ accessToken, apiKey }),
   });
 }
+
+// Create a new venue
+// payload: {
+//   name, description, media:[{url,alt}], price, maxGuests,
+//   meta:{wifi,parking,breakfast,pets},
+//   location:{address, city, zip, country}
+// }
+export function createVenue({ payload, accessToken, apiKey }) {
+  return jfetch(`/holidaze/venues`, {
+    method: "POST",
+    headers: authHeaders({ accessToken, apiKey }),
+    body: JSON.stringify(payload),
+  });
+}

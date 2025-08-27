@@ -1,17 +1,23 @@
+// src/pages/Dashboard.jsx
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { getAccessToken, getApiKey } from "../lib/session.js";
-import { getProfile, updateAvatar } from "../lib/profiles.js";
+import { getProfile, updateAvatar, updateProfile } from "../lib/profiles.js";
+import Modal from "../components/Modal.jsx";
 
 export default function Dashboard() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Avatar modal
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
 
   const accessToken = getAccessToken();
   const apiKey = getApiKey();
-  const name = localStorage.getItem("profileName"); // saved at login
+  const name = localStorage.getItem("profileName");
 
   useEffect(() => {
     let cancel = false;
@@ -47,8 +53,7 @@ export default function Dashboard() {
       .sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
   }, [profile]);
 
-  async function onAvatarSubmit(e) {
-    e.preventDefault();
+  async function onAvatarSave() {
     try {
       setBusy(true);
       await updateAvatar({
@@ -57,7 +62,32 @@ export default function Dashboard() {
         accessToken,
         apiKey,
       });
-      // Refetch profile (or just patch state)
+      // Refetch
+      const res = await getProfile({
+        name,
+        accessToken,
+        apiKey,
+        _bookings: true,
+        _venues: true,
+      });
+      setProfile(res?.data);
+      setAvatarOpen(false);
+    } catch (e) {
+      alert(e.message || "Avatar update failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function becomeManager() {
+    try {
+      setBusy(true);
+      await updateProfile({
+        name,
+        payload: { venueManager: true },
+        accessToken,
+        apiKey,
+      });
       const res = await getProfile({
         name,
         accessToken,
@@ -67,99 +97,113 @@ export default function Dashboard() {
       });
       setProfile(res?.data);
     } catch (e) {
-      alert(e.message || "Avatar update failed");
+      alert(e.message || "Failed to update role");
     } finally {
       setBusy(false);
     }
   }
 
-  if (loading) return <div className="p-6">Loading dashboard…</div>;
-  if (err) return <div className="p-6 text-red-500">{err}</div>;
-  if (!profile) return <div className="p-6">No profile</div>;
+  if (loading) return <div className="p-6 text-black">Loading dashboard…</div>;
+  if (err) return <div className="p-6 text-red-600">{err}</div>;
+  if (!profile) return <div className="p-6 text-black">No profile</div>;
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">
-      {/* Profile header */}
-      <section className="flex items-center gap-4">
-        <img
-          src={profile.avatar?.url || "https://placehold.co/80x80?text=Avatar"}
-          alt={profile.avatar?.alt || profile.name}
-          className="w-16 h-16 rounded-full border border-white/10 object-cover"
-        />
-        <div>
-          <h1 className="text-2xl font-bold">{profile.name}</h1>
-          <div className="text-white/70 text-sm">
-            {profile.venueManager ? "Venue manager" : "Customer"}
+      {/* Profile header + manager controls */}
+      <section className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 rounded-2xl bg-white border border-black/10 p-4">
+        <div className="flex items-center gap-4">
+          <img
+            src={
+              profile.avatar?.url || "https://placehold.co/80x80?text=Avatar"
+            }
+            alt={profile.avatar?.alt || profile.name}
+            className="w-16 h-16 rounded-full border border-black/10 object-cover"
+          />
+          <div>
+            <h1 className="text-2xl font-bold text-black">{profile.name}</h1>
+            <div className="text-black/70 text-sm">
+              {profile.venueManager ? "Venue manager" : "Customer"}
+            </div>
+            <button
+              onClick={() => setAvatarOpen(true)}
+              className="mt-2 inline-block px-3 py-1.5 rounded bg-black text-white text-sm"
+            >
+              Update avatar
+            </button>
           </div>
+        </div>
+
+        {/* Manager role controls now placed here */}
+        <div className="flex items-center gap-2">
+          {!profile.venueManager ? (
+            <button
+              onClick={becomeManager}
+              disabled={busy}
+              className="px-3 py-2 rounded bg-yellow-400 text-black font-semibold disabled:opacity-60"
+            >
+              {busy ? "Enabling…" : "Enable manager role"}
+            </button>
+          ) : (
+            <Link
+              to="/venues/new"
+              className="px-3 py-2 rounded bg-yellow-400 text-black font-semibold"
+            >
+              + Create venue
+            </Link>
+          )}
         </div>
       </section>
 
-      {/* Avatar updater */}
-      <section className="p-4 border border-white/10 rounded bg-white/5">
-        <h2 className="font-semibold mb-2">Update avatar</h2>
-        <form onSubmit={onAvatarSubmit} className="flex gap-2">
-          <input
-            className="flex-1 border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
-            placeholder="https://…"
-            value={avatarUrl}
-            onChange={(e) => setAvatarUrl(e.target.value)}
-          />
-          <button
-            disabled={busy}
-            className="px-4 py-2 rounded bg-yellow-400 text-black font-semibold disabled:opacity-60"
-          >
-            {busy ? "Saving…" : "Save"}
-          </button>
-        </form>
-      </section>
-
       {/* Upcoming bookings */}
-      <section>
-        <h2 className="font-semibold mb-2">Upcoming bookings</h2>
+      <section className="rounded-2xl bg-white border border-black/10 p-4">
+        <h2 className="font-semibold mb-2 text-black">Upcoming bookings</h2>
         {!upcoming.length && (
-          <div className="text-white/70">No upcoming bookings.</div>
+          <div className="text-black/70">No upcoming bookings.</div>
         )}
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
           {upcoming.map((b) => (
             <article
               key={b.id}
-              className="border border-white/10 rounded p-3 bg-white/5"
+              className="border border-black/10 rounded-2xl p-3 bg-white"
             >
-              <div className="text-sm text-white/70">
+              <div className="text-sm text-black/70">
                 {new Date(b.dateFrom).toISOString().slice(0, 10)} →{" "}
                 {new Date(b.dateTo).toISOString().slice(0, 10)}
               </div>
               {b.venue && (
                 <div className="mt-1">
-                  <div className="font-semibold">{b.venue.name}</div>
+                  <div className="font-semibold text-black">{b.venue.name}</div>
                   <img
                     src={
                       b.venue.media?.[0]?.url ||
                       "https://placehold.co/600x400?text=Venue"
                     }
                     alt={b.venue.media?.[0]?.alt || b.venue.name}
-                    className="w-full rounded mt-2 aspect-video object-cover"
+                    className="w-full rounded-xl mt-2 aspect-video object-cover border border-black/10"
                   />
                 </div>
               )}
-              <div className="mt-2 text-sm">Guests: {b.guests}</div>
+              <div className="mt-2 text-sm text-black">Guests: {b.guests}</div>
             </article>
           ))}
         </div>
       </section>
 
-      {/* Manager: my venues */}
+      {/* Manager: My venues */}
       {profile.venueManager && (
-        <section>
-          <h2 className="font-semibold mb-2">My venues</h2>
+        <section className="rounded-2xl bg-white border border-black/10 p-4">
+          <div className="mb-3">
+            <h2 className="font-semibold text-black">My venues</h2>
+          </div>
+
           {!profile.venues?.length && (
-            <div className="text-white/70">You have no venues yet.</div>
+            <div className="text-black/70">You have no venues yet.</div>
           )}
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
             {profile.venues?.map((v) => (
               <article
                 key={v.id}
-                className="border border-white/10 rounded p-3 bg-white/5"
+                className="border border-black/10 rounded-2xl p-3 bg-white"
               >
                 <img
                   src={
@@ -167,18 +211,52 @@ export default function Dashboard() {
                     "https://placehold.co/600x400?text=Venue"
                   }
                   alt={v.media?.[0]?.alt || v.name}
-                  className="w-full rounded mb-2 aspect-video object-cover"
+                  className="w-full rounded-xl mb-2 aspect-video object-cover border border-black/10"
                 />
-                <div className="font-semibold">{v.name}</div>
-                <div className="text-sm text-white/70">
+                <div className="font-semibold text-black">{v.name}</div>
+                <div className="text-sm text-black/70">
                   Guests: {v.maxGuests} • Price: {v.price}
                 </div>
-                {/* Next steps: edit/delete buttons */}
+                {/* Next: add Edit/Delete buttons */}
               </article>
             ))}
           </div>
         </section>
       )}
+
+      {/* Avatar Modal */}
+      <Modal
+        open={avatarOpen}
+        onClose={() => setAvatarOpen(false)}
+        title="Update avatar"
+        actions={
+          <>
+            <button
+              className="px-3 py-2 rounded border border-black/20 text-black"
+              onClick={() => setAvatarOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              disabled={busy}
+              className="px-3 py-2 rounded bg-yellow-400 text-black font-semibold disabled:opacity-60"
+              onClick={onAvatarSave}
+            >
+              {busy ? "Saving…" : "Save"}
+            </button>
+          </>
+        }
+      >
+        <label className="block text-black">
+          <span className="text-sm">Image URL</span>
+          <input
+            className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
+            placeholder="https://…"
+            value={avatarUrl}
+            onChange={(e) => setAvatarUrl(e.target.value)}
+          />
+        </label>
+      </Modal>
     </div>
   );
 }
