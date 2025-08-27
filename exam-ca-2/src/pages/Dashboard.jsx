@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAccessToken, getApiKey } from "../lib/session.js";
 import { getProfile, updateAvatar, updateProfile } from "../lib/profiles.js";
+import { deleteVenue } from "../lib/venues.js";
 import Modal from "../components/Modal.jsx";
 
 export default function Dashboard() {
@@ -18,10 +19,15 @@ export default function Dashboard() {
   // Confirm disable-manager modal
   const [confirmOffOpen, setConfirmOffOpen] = useState(false);
 
+  // Confirm delete venue modal
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [venueToDelete, setVenueToDelete] = useState(null);
+
   const accessToken = getAccessToken();
   const apiKey = getApiKey();
   const name = localStorage.getItem("profileName");
 
+  // Fetch profile (+ bookings, venues)
   useEffect(() => {
     let cancel = false;
     (async () => {
@@ -49,6 +55,7 @@ export default function Dashboard() {
     };
   }, [name, accessToken, apiKey]);
 
+  // Derived: upcoming bookings (future only, sorted asc)
   const upcoming = useMemo(() => {
     const now = Date.now();
     return (profile?.bookings || [])
@@ -56,6 +63,7 @@ export default function Dashboard() {
       .sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
   }, [profile]);
 
+  // Avatar save
   async function onAvatarSave() {
     try {
       setBusy(true);
@@ -81,6 +89,7 @@ export default function Dashboard() {
     }
   }
 
+  // Manager toggle (enable)
   async function enableManager() {
     try {
       setBusy(true);
@@ -105,6 +114,7 @@ export default function Dashboard() {
     }
   }
 
+  // Manager toggle (disable)
   async function disableManager() {
     try {
       setBusy(true);
@@ -125,6 +135,29 @@ export default function Dashboard() {
       setConfirmOffOpen(false);
     } catch (e) {
       alert(e.message || "Failed to disable manager role");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Delete venue confirm
+  async function onConfirmDelete() {
+    if (!venueToDelete) return;
+    try {
+      setBusy(true);
+      await deleteVenue({ id: venueToDelete.id, accessToken, apiKey });
+      const res = await getProfile({
+        name,
+        accessToken,
+        apiKey,
+        _bookings: true,
+        _venues: true,
+      });
+      setProfile(res?.data);
+      setDeleteOpen(false);
+      setVenueToDelete(null);
+    } catch (e) {
+      alert(e.message || "Failed to delete venue");
     } finally {
       setBusy(false);
     }
@@ -267,7 +300,24 @@ export default function Dashboard() {
                 <div className="text-sm text-black/70">
                   Guests: {v.maxGuests} • Price: {v.price}
                 </div>
-                {/* TODO: Edit/Delete buttons here */}
+
+                <div className="mt-3 flex gap-2">
+                  <Link
+                    to={`/venues/${v.id}/edit`}
+                    className="px-3 py-1.5 rounded border border-black/20 text-black text-sm"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setVenueToDelete(v);
+                      setDeleteOpen(true);
+                    }}
+                    className="px-3 py-1.5 rounded bg-black text-white text-sm"
+                  >
+                    Delete
+                  </button>
+                </div>
               </article>
             ))}
           </div>
@@ -335,6 +385,36 @@ export default function Dashboard() {
           You’ll lose access to manager features (create/edit/delete venues).
           Your existing venues and bookings won’t be deleted. You can re-enable
           the manager role anytime.
+        </p>
+      </Modal>
+
+      {/* Confirm Delete Venue Modal */}
+      <Modal
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        title="Delete venue?"
+        actions={
+          <>
+            <button
+              className="px-3 py-2 rounded border border-black/20 text-black"
+              onClick={() => setDeleteOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              disabled={busy}
+              className="px-3 py-2 rounded bg-black text-white font-semibold disabled:opacity-60"
+              onClick={onConfirmDelete}
+            >
+              {busy ? "Deleting…" : "Delete"}
+            </button>
+          </>
+        }
+      >
+        <p className="text-black">
+          This will permanently remove
+          {venueToDelete ? ` “${venueToDelete.name}”` : ""}. This action cannot
+          be undone.
         </p>
       </Modal>
     </div>

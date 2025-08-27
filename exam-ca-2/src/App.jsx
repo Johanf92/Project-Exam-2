@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CreateVenue from "./pages/CreateVenue.jsx";
+import EditVenue from "./pages/EditVenue.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="venues/new" element={<CreateVenue />} />
+            <Route path="venues/:id/edit" element={<EditVenue />} />
           </Route>
           {/* 404 fallback */}
           <Route path="*" element={<div className="p-6">Not Found</div>} />

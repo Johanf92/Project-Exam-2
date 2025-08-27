@@ -70,3 +70,20 @@ export function createVenue({ payload, accessToken, apiKey }) {
     body: JSON.stringify(payload),
   });
 }
+
+// Update a venue you manage
+export function updateVenue({ id, payload, accessToken, apiKey }) {
+  return jfetch(`/holidaze/venues/${id}`, {
+    method: "PUT",
+    headers: authHeaders({ accessToken, apiKey }),
+    body: JSON.stringify(payload),
+  });
+}
+
+// Delete a venue you manage
+export function deleteVenue({ id, accessToken, apiKey }) {
+  return jfetch(`/holidaze/venues/${id}`, {
+    method: "DELETE",
+    headers: authHeaders({ accessToken, apiKey }),
+  });
+}
