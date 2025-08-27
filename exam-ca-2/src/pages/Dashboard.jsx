@@ -11,9 +11,12 @@ export default function Dashboard() {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // Avatar modal
+  // Avatar modal state
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
+
+  // Confirm disable-manager modal
+  const [confirmOffOpen, setConfirmOffOpen] = useState(false);
 
   const accessToken = getAccessToken();
   const apiKey = getApiKey();
@@ -62,7 +65,6 @@ export default function Dashboard() {
         accessToken,
         apiKey,
       });
-      // Refetch
       const res = await getProfile({
         name,
         accessToken,
@@ -79,7 +81,7 @@ export default function Dashboard() {
     }
   }
 
-  async function becomeManager() {
+  async function enableManager() {
     try {
       setBusy(true);
       await updateProfile({
@@ -97,7 +99,32 @@ export default function Dashboard() {
       });
       setProfile(res?.data);
     } catch (e) {
-      alert(e.message || "Failed to update role");
+      alert(e.message || "Failed to enable manager role");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function disableManager() {
+    try {
+      setBusy(true);
+      await updateProfile({
+        name,
+        payload: { venueManager: false },
+        accessToken,
+        apiKey,
+      });
+      const res = await getProfile({
+        name,
+        accessToken,
+        apiKey,
+        _bookings: true,
+        _venues: true,
+      });
+      setProfile(res?.data);
+      setConfirmOffOpen(false);
+    } catch (e) {
+      alert(e.message || "Failed to disable manager role");
     } finally {
       setBusy(false);
     }
@@ -133,17 +160,40 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Manager role controls now placed here */}
-        <div className="flex items-center gap-2">
-          {!profile.venueManager ? (
+        {/* Manager toggle + create button (if enabled) */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-black/70 text-sm">Venue manager:</span>
             <button
-              onClick={becomeManager}
+              type="button"
+              onClick={() => {
+                if (profile.venueManager) {
+                  setConfirmOffOpen(true);
+                } else {
+                  enableManager();
+                }
+              }}
               disabled={busy}
-              className="px-3 py-2 rounded bg-yellow-400 text-black font-semibold disabled:opacity-60"
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+                profile.venueManager ? "bg-black" : "bg-black/30"
+              } ${busy ? "opacity-60" : ""}`}
+              aria-pressed={profile.venueManager}
+              aria-label="Toggle venue manager role"
+              title={
+                profile.venueManager
+                  ? "Disable manager role"
+                  : "Enable manager role"
+              }
             >
-              {busy ? "Enabling…" : "Enable manager role"}
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
+                  profile.venueManager ? "translate-x-5" : "translate-x-1"
+                }`}
+              />
             </button>
-          ) : (
+          </div>
+
+          {profile.venueManager && (
             <Link
               to="/venues/new"
               className="px-3 py-2 rounded bg-yellow-400 text-black font-semibold"
@@ -189,7 +239,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Manager: My venues */}
+      {/* My venues (visible if manager) */}
       {profile.venueManager && (
         <section className="rounded-2xl bg-white border border-black/10 p-4">
           <div className="mb-3">
@@ -217,7 +267,7 @@ export default function Dashboard() {
                 <div className="text-sm text-black/70">
                   Guests: {v.maxGuests} • Price: {v.price}
                 </div>
-                {/* Next: add Edit/Delete buttons */}
+                {/* TODO: Edit/Delete buttons here */}
               </article>
             ))}
           </div>
@@ -256,6 +306,36 @@ export default function Dashboard() {
             onChange={(e) => setAvatarUrl(e.target.value)}
           />
         </label>
+      </Modal>
+
+      {/* Confirm Disable Manager Modal */}
+      <Modal
+        open={confirmOffOpen}
+        onClose={() => setConfirmOffOpen(false)}
+        title="Disable manager role?"
+        actions={
+          <>
+            <button
+              className="px-3 py-2 rounded border border-black/20 text-black"
+              onClick={() => setConfirmOffOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              disabled={busy}
+              className="px-3 py-2 rounded bg-black text-white font-semibold disabled:opacity-60"
+              onClick={disableManager}
+            >
+              {busy ? "Updating…" : "Disable"}
+            </button>
+          </>
+        }
+      >
+        <p className="text-black">
+          You’ll lose access to manager features (create/edit/delete venues).
+          Your existing venues and bookings won’t be deleted. You can re-enable
+          the manager role anytime.
+        </p>
       </Modal>
     </div>
   );
