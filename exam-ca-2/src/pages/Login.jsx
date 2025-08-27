@@ -58,6 +58,17 @@ export default function Login() {
       >
         {busy ? "Signing in…" : "Login"}
       </button>
+
+      <div className="text-center mt-4">
+        <span className="text-black/70 text-sm">Don’t have an account?</span>{" "}
+        <button
+          type="button"
+          onClick={() => nav("/register")}
+          className="text-sm font-semibold text-yellow-600 hover:underline"
+        >
+          Register here
+        </button>
+      </div>
     </form>
   );
 }

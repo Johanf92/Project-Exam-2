@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAccessToken, getApiKey } from "../lib/session.js";
 import { getProfile, updateAvatar, updateProfile } from "../lib/profiles.js";
-import { deleteVenue } from "../lib/venues.js";
+import { deleteVenue, getVenueById } from "../lib/venues.js";
 import Modal from "../components/Modal.jsx";
 
 export default function Dashboard() {
@@ -12,16 +12,23 @@ export default function Dashboard() {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // Avatar modal state
+  // Avatar modal
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
 
-  // Confirm disable-manager modal
+  // Manager disable confirm
   const [confirmOffOpen, setConfirmOffOpen] = useState(false);
 
-  // Confirm delete venue modal
+  // Delete venue confirm
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [venueToDelete, setVenueToDelete] = useState(null);
+
+  // View bookings modal
+  const [bookingsOpen, setBookingsOpen] = useState(false);
+  const [bookingsVenue, setBookingsVenue] = useState(null); // { id, name }
+  const [bookingsList, setBookingsList] = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [bookingsErr, setBookingsErr] = useState("");
 
   const accessToken = getAccessToken();
   const apiKey = getApiKey();
@@ -163,6 +170,31 @@ export default function Dashboard() {
     }
   }
 
+  // Open "View bookings" modal for a venue
+  async function openBookingsForVenue(v) {
+    setBookingsVenue({ id: v.id, name: v.name });
+    setBookingsOpen(true);
+    setBookingsErr("");
+    setBookingsList([]);
+    try {
+      setBookingsLoading(true);
+      const res = await getVenueById({
+        id: v.id,
+        accessToken,
+        apiKey,
+        includeBookings: true,
+      });
+      const list = (res?.data?.bookings || [])
+        .slice()
+        .sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
+      setBookingsList(list);
+    } catch (e) {
+      setBookingsErr(e.message || "Failed to fetch bookings");
+    } finally {
+      setBookingsLoading(false);
+    }
+  }
+
   if (loading) return <div className="p-6 text-black">Loading dashboard…</div>;
   if (err) return <div className="p-6 text-red-600">{err}</div>;
   if (!profile) return <div className="p-6 text-black">No profile</div>;
@@ -301,7 +333,7 @@ export default function Dashboard() {
                   Guests: {v.maxGuests} • Price: {v.price}
                 </div>
 
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
                   <Link
                     to={`/venues/${v.id}/edit`}
                     className="px-3 py-1.5 rounded border border-black/20 text-black text-sm"
@@ -316,6 +348,12 @@ export default function Dashboard() {
                     className="px-3 py-1.5 rounded bg-black text-white text-sm"
                   >
                     Delete
+                  </button>
+                  <button
+                    onClick={() => openBookingsForVenue(v)}
+                    className="px-3 py-1.5 rounded border border-black/20 text-black text-sm"
+                  >
+                    View bookings
                   </button>
                 </div>
               </article>
@@ -416,6 +454,48 @@ export default function Dashboard() {
           {venueToDelete ? ` “${venueToDelete.name}”` : ""}. This action cannot
           be undone.
         </p>
+      </Modal>
+
+      {/* View Bookings for a Venue Modal */}
+      <Modal
+        open={bookingsOpen}
+        onClose={() => setBookingsOpen(false)}
+        title={bookingsVenue ? `Bookings — ${bookingsVenue.name}` : "Bookings"}
+        actions={
+          <>
+            <button
+              className="px-3 py-2 rounded border border-black/20 text-black"
+              onClick={() => setBookingsOpen(false)}
+            >
+              Close
+            </button>
+          </>
+        }
+      >
+        {bookingsLoading && <div className="text-black">Loading…</div>}
+        {bookingsErr && <div className="text-red-600">{bookingsErr}</div>}
+        {!bookingsLoading &&
+          !bookingsErr &&
+          (bookingsList.length ? (
+            <div className="space-y-2">
+              {bookingsList.map((b) => (
+                <div
+                  key={b.id}
+                  className="border border-black/10 rounded p-2 text-sm"
+                >
+                  <div className="text-black font-medium">
+                    {new Date(b.dateFrom).toISOString().slice(0, 10)} →{" "}
+                    {new Date(b.dateTo).toISOString().slice(0, 10)}
+                  </div>
+                  <div className="text-black/80">Guests: {b.guests}</div>
+                  {/* If API includes customer info in booking, render it here */}
+                  {/* <div className="text-black/60">By: {b.customer?.name}</div> */}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-black/70">No bookings yet for this venue.</div>
+          ))}
       </Modal>
     </div>
   );
