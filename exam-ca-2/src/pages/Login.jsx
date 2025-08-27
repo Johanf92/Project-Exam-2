@@ -17,6 +17,7 @@ export default function Login() {
       const { data } = await login({ email, password });
       const accessToken = data?.accessToken;
       localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("profileName", data?.name);
 
       // Create API key (first time) and store it
       const keyResp = await createApiKey({ accessToken, name: "Holidaze FE" });
