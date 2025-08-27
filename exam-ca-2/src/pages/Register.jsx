@@ -32,7 +32,7 @@ export default function Register() {
 
     try {
       setBusy(true);
-      // 1) Register
+      // Register
       await register({
         name: name.trim(),
         email: email.trim(),
@@ -40,21 +40,22 @@ export default function Register() {
         venueManager,
       });
 
-      // 2) Auto-login
+      // Auto-login
       const { data } = await login({ email, password });
-      const accessToken = data?.accessToken;
-      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("accessToken", data?.accessToken);
       localStorage.setItem("profileName", data?.name);
 
-      // 3) Create API key and store
-      const keyResp = await createApiKey({ accessToken, name: "Holidaze FE" });
-      const apiKey = keyResp?.data?.key;
-      localStorage.setItem("apiKey", apiKey);
+      // API key
+      const keyResp = await createApiKey({
+        accessToken: data?.accessToken,
+        name: "Holidaze FE",
+      });
+      localStorage.setItem("apiKey", keyResp?.data?.key);
 
-      // notify listeners (navbar/mobile)
+      // Sync nav state
       window.dispatchEvent(new Event("auth:changed"));
 
-      // 4) Go to dashboard (or home)
+      // Go dashboard
       nav("/dashboard");
     } catch (e) {
       setErr(e.message || "Registration failed");
@@ -64,13 +65,16 @@ export default function Register() {
   }
 
   return (
-    <div className="p-6 max-w-md mx-auto">
+    // NOTE: no "min-h-screen" — keeps footer visible without scrolling
+    <div className="flex items-center justify-center p-6">
       <form
         onSubmit={onSubmit}
-        className="space-y-4 border border-black/10 rounded-2xl bg-white p-5"
+        className="w-full max-w-md space-y-4 border border-black/10 rounded-2xl bg-white p-6 shadow"
       >
-        <h1 className="text-2xl font-bold text-black">Create account</h1>
-        {err && <div className="text-red-600">{err}</div>}
+        <h1 className="text-2xl font-bold text-black text-center">
+          Create account
+        </h1>
+        {err && <div className="text-red-600 text-sm">{err}</div>}
 
         <label className="block text-black">
           <span className="text-sm">Name *</span>
@@ -119,6 +123,19 @@ export default function Register() {
         >
           {busy ? "Creating…" : "Create account"}
         </button>
+
+        <div className="text-center mt-4">
+          <span className="text-black/70 text-sm">
+            Already have an account?
+          </span>{" "}
+          <button
+            type="button"
+            onClick={() => nav("/login")}
+            className="text-sm font-semibold text-yellow-600 hover:underline"
+          >
+            Login here
+          </button>
+        </div>
       </form>
     </div>
   );
