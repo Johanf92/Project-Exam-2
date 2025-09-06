@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createVenue } from "../lib/venues.js";
 import { getAccessToken, getApiKey } from "../lib/session.js";
 import { getProfile } from "../lib/profiles.js";
+import MediaList from "../components/MediaList.jsx";
 
 export default function CreateVenue() {
   const nav = useNavigate();
@@ -10,36 +11,15 @@ export default function CreateVenue() {
   const apiKey = getApiKey();
   const nameFromLS = localStorage.getItem("profileName");
 
-  // simple manager gate (fetch profile to confirm)
-  const [isManager, setIsManager] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
-  useEffect(() => {
-    let cancel = false;
-    (async () => {
-      try {
-        const res = await getProfile({ name: nameFromLS, accessToken, apiKey });
-        if (!cancel) setIsManager(!!res?.data?.venueManager);
-      } catch (e) {
-        if (!cancel) setErr(e.message);
-      } finally {
-        if (!cancel) setLoading(false);
-      }
-    })();
-    return () => {
-      cancel = true;
-    };
-  }, [nameFromLS, accessToken, apiKey]);
-
-  // form state
   const [form, setForm] = useState({
     name: "",
     description: "",
     price: "",
     maxGuests: "",
-    mediaUrl: "",
-    mediaAlt: "",
+    media: [{ url: "", alt: "" }], // multiple images
     wifi: false,
     parking: false,
     breakfast: false,
@@ -49,8 +29,6 @@ export default function CreateVenue() {
     zip: "",
     country: "",
   });
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState("");
 
   function update(k, v) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -59,26 +37,35 @@ export default function CreateVenue() {
   async function onSubmit(e) {
     e.preventDefault();
     setErr("");
-    setMsg("");
 
-    // basic validation
-    if (!form.name?.trim()) return setErr("Name is required");
+    // Must be a venue manager
+    try {
+      const prof = await getProfile({ name: nameFromLS, accessToken, apiKey });
+      if (!prof?.data?.venueManager) {
+        setErr("You must be a venue manager to create venues.");
+        return;
+      }
+    } catch {
+      setErr("Unable to verify manager role.");
+      return;
+    }
+
+    if (!form.name.trim()) return setErr("Name is required");
     if (!form.price || Number(form.price) < 0)
       return setErr("Price must be ≥ 0");
     if (!form.maxGuests || Number(form.maxGuests) < 1)
       return setErr("Max guests must be ≥ 1");
 
+    // Build media array (filter out empty rows, trim, keep max 8 for sanity)
+    const media = (form.media || [])
+      .map((m) => ({ url: m.url?.trim(), alt: (m.alt || form.name).trim() }))
+      .filter((m) => !!m.url)
+      .slice(0, 8);
+
     const payload = {
       name: form.name.trim(),
       description: form.description?.trim() || "",
-      media: form.mediaUrl
-        ? [
-            {
-              url: form.mediaUrl.trim(),
-              alt: form.mediaAlt?.trim() || form.name.trim(),
-            },
-          ]
-        : [],
+      media,
       price: Number(form.price),
       maxGuests: Number(form.maxGuests),
       meta: {
@@ -98,10 +85,13 @@ export default function CreateVenue() {
     try {
       setBusy(true);
       const res = await createVenue({ payload, accessToken, apiKey });
-      setMsg("🎉 Venue created!");
-      // Navigate to dashboard or the new venue
-      // nav(`/venue/${res?.data?.id}`);
-      nav("/dashboard");
+      const created = res?.data;
+      // Go to the newly created venue
+      if (created?.id) {
+        nav(`/venue/${created.id}`);
+      } else {
+        nav("/dashboard");
+      }
     } catch (e) {
       setErr(e.message || "Failed to create venue");
     } finally {
@@ -109,87 +99,65 @@ export default function CreateVenue() {
     }
   }
 
-  if (loading) return <div className="p-6">Checking manager access…</div>;
-  if (!isManager) {
-    return (
-      <div className="p-6 text-red-500">
-        You must be a venue manager to create venues.
-      </div>
-    );
-  }
-
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Create a venue</h1>
-      {msg && <div className="mb-3 text-green-400">{msg}</div>}
-      {err && <div className="mb-3 text-red-400">{err}</div>}
+      <h1 className="text-2xl font-bold text-black mb-4">Create venue</h1>
+      {err && <div className="mb-3 text-red-600">{err}</div>}
 
       <form
         onSubmit={onSubmit}
-        className="space-y-4 border border-white/10 rounded bg-white/5 p-4"
+        className="space-y-5 border border-black/10 rounded bg-white p-4"
       >
         <div className="grid sm:grid-cols-2 gap-3">
-          <label className="block">
+          <label className="block text-black">
             <span className="text-sm">Name *</span>
             <input
-              className="mt-1 w-full border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
+              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
               value={form.name}
               onChange={(e) => update("name", e.target.value)}
             />
           </label>
-          <label className="block">
+          <label className="block text-black">
             <span className="text-sm">Price *</span>
             <input
               type="number"
               min={0}
-              className="mt-1 w-full border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
+              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
               value={form.price}
               onChange={(e) => update("price", e.target.value)}
             />
           </label>
-          <label className="block">
+          <label className="block text-black">
             <span className="text-sm">Max guests *</span>
             <input
               type="number"
               min={1}
-              className="mt-1 w-full border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
+              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
               value={form.maxGuests}
               onChange={(e) => update("maxGuests", e.target.value)}
             />
           </label>
-          <label className="block sm:col-span-2">
+          <label className="block text-black sm:col-span-2">
             <span className="text-sm">Description</span>
             <textarea
               rows={4}
-              className="mt-1 w-full border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
+              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
               value={form.description}
               onChange={(e) => update("description", e.target.value)}
             />
           </label>
         </div>
 
-        {/* Media */}
-        <div className="grid sm:grid-cols-2 gap-3">
-          <label className="block">
-            <span className="text-sm">Image URL</span>
-            <input
-              className="mt-1 w-full border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
-              value={form.mediaUrl}
-              onChange={(e) => update("mediaUrl", e.target.value)}
-            />
-          </label>
-          <label className="block">
-            <span className="text-sm">Image alt</span>
-            <input
-              className="mt-1 w-full border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
-              value={form.mediaAlt}
-              onChange={(e) => update("mediaAlt", e.target.value)}
-            />
-          </label>
+        {/* Multiple images */}
+        <div>
+          <h2 className="font-semibold text-black mb-2">Images</h2>
+          <MediaList
+            items={form.media}
+            onChange={(val) => update("media", val)}
+          />
         </div>
 
-        {/* Amenities */}
-        <fieldset className="grid sm:grid-cols-4 gap-3">
+        <fieldset className="grid sm:grid-cols-4 gap-3 text-black">
           <label className="inline-flex items-center gap-2">
             <input
               type="checkbox"
@@ -224,36 +192,35 @@ export default function CreateVenue() {
           </label>
         </fieldset>
 
-        {/* Location */}
         <div className="grid sm:grid-cols-2 gap-3">
-          <label className="block">
+          <label className="block text-black">
             <span className="text-sm">Address</span>
             <input
-              className="mt-1 w-full border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
+              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
               value={form.address}
               onChange={(e) => update("address", e.target.value)}
             />
           </label>
-          <label className="block">
+          <label className="block text-black">
             <span className="text-sm">City</span>
             <input
-              className="mt-1 w-full border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
+              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
               value={form.city}
               onChange={(e) => update("city", e.target.value)}
             />
           </label>
-          <label className="block">
+          <label className="block text-black">
             <span className="text-sm">ZIP</span>
             <input
-              className="mt-1 w-full border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
+              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
               value={form.zip}
               onChange={(e) => update("zip", e.target.value)}
             />
           </label>
-          <label className="block">
+          <label className="block text-black">
             <span className="text-sm">Country</span>
             <input
-              className="mt-1 w-full border border-white/20 bg-black/40 text-white px-3 py-2 rounded"
+              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
               value={form.country}
               onChange={(e) => update("country", e.target.value)}
             />

@@ -198,7 +198,7 @@ export default function Venue() {
 
       {/* Availability */}
       <section className="rounded-2xl bg-white border border-black/10 p-4">
-        <h2 className="font-semibold text-black mb-2">Availability</h2>
+        <h2 className="font-semibold text-black mb-2 ">Availability</h2>
         <CalendarRange
           bookings={venue.bookings || []}
           selected={{
@@ -267,7 +267,7 @@ export default function Venue() {
 
           <button
             disabled={busy}
-            className="mt-2 px-4 py-2 rounded bg-yellow-400 text-black font-semibold disabled:opacity-60"
+            className="px-3 py-1.5 rounded border bg-yellow-400 text-black cursor-pointer text-sm mx-auto block"
           >
             {busy ? "Booking…" : "Book now"}
           </button>

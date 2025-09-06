@@ -58,7 +58,7 @@ export function Navbar({ menuOpen, setMenuOpen }) {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-yellow-300 hover:text-white transition-colors"
+                  className="text-yellow-300 hover:text-white cursor-pointer transition-colors"
                 >
                   Logout
                 </button>
@@ -66,7 +66,7 @@ export function Navbar({ menuOpen, setMenuOpen }) {
             ) : (
               <Link
                 to="/login"
-                className="text-yellow-300 hover:text-white transition-colors"
+                className="text-yellow-300 hover:text-white cursor-pointer transition-colors"
               >
                 Login
               </Link>

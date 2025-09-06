@@ -73,7 +73,7 @@ export default function Login() {
 
         <button
           disabled={busy}
-          className="w-full px-4 py-2 rounded bg-yellow-400 text-black font-semibold disabled:opacity-60"
+          className="w-full px-4 py-2 rounded bg-yellow-400 text-black font-semibold cursor-pointer disabled:opacity-60"
         >
           {busy ? "Logging in…" : "Login"}
         </button>
@@ -83,7 +83,7 @@ export default function Login() {
           <button
             type="button"
             onClick={() => nav("/register")}
-            className="text-sm font-semibold text-yellow-600 hover:underline"
+            className="text-sm font-semibold text-yellow-600 cursor-pointer hover:underline"
           >
             Register here
           </button>

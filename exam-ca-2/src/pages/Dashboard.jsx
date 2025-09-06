@@ -218,7 +218,7 @@ export default function Dashboard() {
             </div>
             <button
               onClick={() => setAvatarOpen(true)}
-              className="mt-2 inline-block px-3 py-1.5 rounded bg-black text-white text-sm"
+              className="mt-2 inline-block px-3 py-1.5 rounded bg-black text-white cursor-pointer text-sm"
             >
               Update avatar
             </button>
@@ -261,7 +261,7 @@ export default function Dashboard() {
           {profile.venueManager && (
             <Link
               to="/venues/new"
-              className="px-3 py-2 rounded bg-yellow-400 text-black font-semibold"
+              className="px-3 py-1.5 rounded border bg-yellow-400 text-black cursor-pointer text-sm  hover:bg-yellow-300 hover:shadow-md"
             >
               + Create venue
             </Link>
@@ -345,13 +345,13 @@ export default function Dashboard() {
                       setVenueToDelete(v);
                       setDeleteOpen(true);
                     }}
-                    className="px-3 py-1.5 rounded bg-black text-white text-sm"
+                    className="px-3 py-1.5 rounded bg-black text-white cursor-pointer text-sm"
                   >
                     Delete
                   </button>
                   <button
                     onClick={() => openBookingsForVenue(v)}
-                    className="px-3 py-1.5 rounded border border-black/20 text-black text-sm"
+                    className="px-3 py-1.5 rounded border bg-yellow-400 text-black cursor-pointer text-sm"
                   >
                     View bookings
                   </button>

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getVenueById, updateVenue } from "../lib/venues.js";
 import { getAccessToken, getApiKey } from "../lib/session.js";
 import { getProfile } from "../lib/profiles.js";
+import MediaList from "../components/MediaList.jsx";
 
 export default function EditVenue() {
   const { id } = useParams();
@@ -21,8 +22,7 @@ export default function EditVenue() {
     description: "",
     price: "",
     maxGuests: "",
-    mediaUrl: "",
-    mediaAlt: "",
+    media: [{ url: "", alt: "" }], // multi
     wifi: false,
     parking: false,
     breakfast: false,
@@ -42,7 +42,6 @@ export default function EditVenue() {
     (async () => {
       try {
         setLoading(true);
-        // Confirm manager access
         const prof = await getProfile({
           name: nameFromLS,
           accessToken,
@@ -50,7 +49,6 @@ export default function EditVenue() {
         });
         if (!cancel) setIsManager(!!prof?.data?.venueManager);
 
-        // Load venue with current values
         const res = await getVenueById({ id, accessToken, apiKey });
         const v = res?.data;
         if (v && !cancel) {
@@ -59,8 +57,13 @@ export default function EditVenue() {
             description: v.description || "",
             price: String(v.price ?? ""),
             maxGuests: String(v.maxGuests ?? ""),
-            mediaUrl: v.media?.[0]?.url || "",
-            mediaAlt: v.media?.[0]?.alt || "",
+            media:
+              v.media && v.media.length
+                ? v.media.map((m) => ({
+                    url: m.url || "",
+                    alt: m.alt || v.name || "",
+                  }))
+                : [{ url: "", alt: "" }],
             wifi: !!v.meta?.wifi,
             parking: !!v.meta?.parking,
             breakfast: !!v.meta?.breakfast,
@@ -96,17 +99,15 @@ export default function EditVenue() {
     if (!form.maxGuests || Number(form.maxGuests) < 1)
       return setErr("Max guests must be ≥ 1");
 
+    const media = (form.media || [])
+      .map((m) => ({ url: m.url?.trim(), alt: (m.alt || form.name).trim() }))
+      .filter((m) => !!m.url)
+      .slice(0, 8);
+
     const payload = {
       name: form.name.trim(),
       description: form.description?.trim() || "",
-      media: form.mediaUrl
-        ? [
-            {
-              url: form.mediaUrl.trim(),
-              alt: form.mediaAlt?.trim() || form.name.trim(),
-            },
-          ]
-        : [],
+      media,
       price: Number(form.price),
       maxGuests: Number(form.maxGuests),
       meta: {
@@ -126,7 +127,6 @@ export default function EditVenue() {
     try {
       setBusy(true);
       await updateVenue({ id, payload, accessToken, apiKey });
-      // go back to the venue page or dashboard
       nav(`/venue/${id}`);
     } catch (e) {
       setErr(e.message || "Failed to update venue");
@@ -145,7 +145,7 @@ export default function EditVenue() {
 
       <form
         onSubmit={onSubmit}
-        className="space-y-4 border border-black/10 rounded bg-white p-4"
+        className="space-y-5 border border-black/10 rounded bg-white p-4"
       >
         <div className="grid sm:grid-cols-2 gap-3">
           <label className="block text-black">
@@ -187,23 +187,13 @@ export default function EditVenue() {
           </label>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-3">
-          <label className="block text-black">
-            <span className="text-sm">Image URL</span>
-            <input
-              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
-              value={form.mediaUrl}
-              onChange={(e) => update("mediaUrl", e.target.value)}
-            />
-          </label>
-          <label className="block text-black">
-            <span className="text-sm">Image alt</span>
-            <input
-              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
-              value={form.mediaAlt}
-              onChange={(e) => update("mediaAlt", e.target.value)}
-            />
-          </label>
+        {/* Multiple images */}
+        <div>
+          <h2 className="font-semibold text-black mb-2">Images</h2>
+          <MediaList
+            items={form.media}
+            onChange={(val) => update("media", val)}
+          />
         </div>
 
         <fieldset className="grid sm:grid-cols-4 gap-3 text-black">
