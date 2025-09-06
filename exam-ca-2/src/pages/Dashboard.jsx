@@ -5,6 +5,7 @@ import { getAccessToken, getApiKey } from "../lib/session.js";
 import { getProfile, updateAvatar, updateProfile } from "../lib/profiles.js";
 import { deleteVenue, getVenueById } from "../lib/venues.js";
 import Modal from "../components/Modal.jsx";
+import { cancelBooking } from "../lib/bookings.js";
 
 export default function Dashboard() {
   const [profile, setProfile] = useState(null);
@@ -279,12 +280,13 @@ export default function Dashboard() {
           {upcoming.map((b) => (
             <article
               key={b.id}
-              className="border border-black/10 rounded-2xl p-3 bg-white"
+              className="border border-black/10 rounded-2xl p-3 bg-white flex flex-col"
             >
               <div className="text-sm text-black/70">
                 {new Date(b.dateFrom).toISOString().slice(0, 10)} →{" "}
                 {new Date(b.dateTo).toISOString().slice(0, 10)}
               </div>
+
               {b.venue && (
                 <div className="mt-1">
                   <div className="font-semibold text-black">{b.venue.name}</div>
@@ -298,7 +300,38 @@ export default function Dashboard() {
                   />
                 </div>
               )}
+
               <div className="mt-2 text-sm text-black">Guests: {b.guests}</div>
+
+              {/* Cancel button */}
+              <button
+                onClick={async () => {
+                  if (
+                    !window.confirm(
+                      "Are you sure you want to cancel this booking?"
+                    )
+                  )
+                    return;
+                  try {
+                    await cancelBooking({ id: b.id, accessToken, apiKey });
+                    // Refetch profile to refresh upcoming list
+                    const res = await getProfile({
+                      name,
+                      accessToken,
+                      apiKey,
+                      _bookings: true,
+                      _venues: true,
+                    });
+                    setProfile(res?.data);
+                  } catch (e) {
+                    alert(e.message || "Failed to cancel booking");
+                  }
+                }}
+                className="mt-auto px-3 py-1.5 rounded bg-black text-white cursor-pointer text-sm
+               hover:bg-black/80 active:scale-95 transition disabled:opacity-60"
+              >
+                Cancel booking
+              </button>
             </article>
           ))}
         </div>
@@ -318,7 +351,7 @@ export default function Dashboard() {
             {profile.venues?.map((v) => (
               <article
                 key={v.id}
-                className="border border-black/10 rounded-2xl p-3 bg-white"
+                className="border border-black/10 rounded-2xl p-3 bg-white flex flex-col"
               >
                 <img
                   src={
@@ -333,7 +366,7 @@ export default function Dashboard() {
                   Guests: {v.maxGuests} • Price: {v.price}
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-auto pt-3 flex flex-wrap gap-2">
                   <Link
                     to={`/venues/${v.id}/edit`}
                     className="px-3 py-1.5 rounded border border-black/20 text-black text-sm"
