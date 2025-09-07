@@ -1,8 +1,9 @@
+// src/layout/Layout.jsx
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { Navbar } from "../components/Navbar";
-import { MobileMenu } from "../components/MobileMenu";
-import Footer from "../components/Footer";
+import { Navbar } from "../components/Navbar.jsx";
+import { MobileMenu } from "../components/MobileMenu.jsx";
+import Footer from "../components/Footer.jsx";
 
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,7 +13,7 @@ export default function Layout() {
       <Navbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       <MobileMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       <main className="flex-1 pt-16">
-        <Outlet />
+        <Outlet /> {/* <- required for nested routes */}
       </main>
       <Footer />
     </div>
