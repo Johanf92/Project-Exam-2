@@ -90,8 +90,9 @@ npm run deploy
 
 - **Kanban Board:** [GitHub Project](https://github.com/users/Johanf92/projects/3)
 - **Design Style Guide:** [Figma] (https://www.figma.com/design/mqGzVxnoapPqCBwFAPAGrr/Untitled?node-id=0-1&m=dev&t=RuqiPpzKaNe8NF00-1)
-- **Gantt Chart & Planning:** (https://github.com/users/Johanf92/projects/3)
+- **Gantt Chart & Planning:** (https://github.com/users/Johanf92/projects/3/views/4)
 - **API Reference:** [Noroff Holidaze API](https://docs.noroff.dev/docs/v2)
+- **Figma Prototype:** (https://www.figma.com/design/mqGzVxnoapPqCBwFAPAGrr/Untitled?node-id=0-1&m=dev&t=RuqiPpzKaNe8NF00-1)
 
 ---
 
