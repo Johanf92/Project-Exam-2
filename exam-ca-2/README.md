@@ -1,12 +1,111 @@
-# React + Vite
+# 🏖 Holidaze – Accommodation Booking Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Holidaze is a modern accommodation booking application built as part of my final frontend exam at Noroff.  
+The project implements a **customer-facing side** (browsing and booking venues) and an **admin-facing side** (venue managers can create, update, and manage venues and bookings).
 
-Currently, two official plugins are available:
+This project is built with **React + Vite + TailwindCSS** and integrates with the official [Noroff Holidaze API](https://docs.noroff.dev/docs/v2).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## ✨ Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Customer
+
+- Browse and search venues by name, location, price, and amenities
+- Check availability with a calendar view
+- Register/login as customer
+- Book venues and manage upcoming bookings
+- Update user avatar
+
+### Venue Manager
+
+- Register/login as a venue manager
+- Create new venues with multiple images
+- Edit or delete owned venues
+- View bookings for venues
+
+### Shared
+
+- Authentication & authorization (JWT + API Key)
+- Responsive UI (mobile-first, desktop-friendly)
+- Hosted demo with GitHub Pages
+
+---
+
+## 🛠 Tech Stack
+
+- **Framework:** [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Styling:** [TailwindCSS 4](https://tailwindcss.com/)
+- **Routing:** [React Router v7](https://reactrouter.com/)
+- **Icons:** FontAwesome + React Icons
+- **Calendar:** React Day Picker
+- **Hosting:** GitHub Pages
+- **API:** [Noroff Holidaze API v2](https://docs.noroff.dev/docs/v2)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Make sure you have installed:
+
+- [Node.js](https://nodejs.org/) (v18 or later)
+- npm (comes with Node.js)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/Project-Exam-2.git
+   cd Project-Exam-2/exam-ca-2
+   ```
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Start development server:
+
+```bash
+npm run dev
+```
+
+4. Build for production:
+
+```bash
+npm run build
+```
+
+5. Deploy to GitHub Pages:
+
+```bash
+npm run deploy
+```
+
+---
+
+## 📅 Process & Planning
+
+- **Kanban Board:** [GitHub Project](https://github.com/users/Johanf92/projects/3)
+- **Design Style Guide:** [Figma] (https://www.figma.com/design/mqGzVxnoapPqCBwFAPAGrr/Untitled?node-id=0-1&m=dev&t=RuqiPpzKaNe8NF00-1)
+- **Gantt Chart & Planning:** (https://github.com/users/Johanf92/projects/3/views/4)
+- **API Reference:** [Noroff Holidaze API](https://docs.noroff.dev/docs/v2)
+- **Figma Prototype:** (https://www.figma.com/design/mqGzVxnoapPqCBwFAPAGrr/Untitled?node-id=0-1&m=dev&t=RuqiPpzKaNe8NF00-1)
+
+---
+
+## 🔗 Links
+
+- **Repository:** [Project Repo](https://github.com/Johanf92/Project-Exam-2)
+- **Live Demo:** [Holidaze on GitHub Pages](https://johanf92.github.io/Project-Exam-2/)
+- **API Documentation:** [Noroff Holidaze API](https://docs.noroff.dev/docs/v2)
+- **Swagger UI:** [API Swagger](https://v2.api.noroff.dev/docs/static/index.html)
+
+---
+
+## 👨‍💻 Author
+
+**Johan Frederic Aas-Haug**  
+Frontend Developer Student @ Noroff

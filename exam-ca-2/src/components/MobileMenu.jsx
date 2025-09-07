@@ -1,6 +1,46 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { isAuthed, logout } from "../lib/session.js";
+
+/**
+ * @file MobileMenu component — a full-screen overlay navigation for mobile devices.
+ * Handles authentication state changes and supports login/logout links.
+ */
+
+/**
+ * MobileMenu component.
+ *
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.menuOpen - Whether the mobile menu is currently open.
+ * @param {(open: boolean) => void} props.setMenuOpen - Function to toggle menu visibility.
+ * @returns {JSX.Element} A full-screen mobile navigation menu.
+ */
 
 export function MobileMenu({ menuOpen, setMenuOpen }) {
+  const [authed, setAuthed] = useState(isAuthed());
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const onStorage = () => setAuthed(isAuthed());
+    const onAuthChanged = () => setAuthed(isAuthed());
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("auth:changed", onAuthChanged);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("auth:changed", onAuthChanged);
+    };
+  }, []);
+
+  function close() {
+    setMenuOpen(false);
+  }
+  function handleLogout() {
+    logout();
+    close();
+    navigate("/login");
+  }
+
   return (
     <div
       className={`fixed top-0 left-0 w-full bg-[rgba(10,10,10,0.8)] z-50 flex flex-col items-center justify-center transition-all duration-300 ease-in-out
@@ -11,7 +51,7 @@ export function MobileMenu({ menuOpen, setMenuOpen }) {
       }`}
     >
       <button
-        onClick={() => setMenuOpen(false)}
+        onClick={close}
         className="absolute top-6 right-6 text-white text-3xl focus:outline-none cursor-pointer"
         aria-label="Close Menu"
       >
@@ -21,27 +61,37 @@ export function MobileMenu({ menuOpen, setMenuOpen }) {
       <nav className="flex flex-col items-center">
         <Link
           to="/"
-          onClick={() => setMenuOpen(false)}
+          onClick={close}
           className="text-2xl font-semibold text-white my-4"
         >
-          Home
+          Venues
         </Link>
 
-        <Link
-          to="/login"
-          onClick={() => setMenuOpen(false)}
-          className="text-2xl font-semibold text-white my-4"
-        >
-          Login
-        </Link>
-
-        <Link
-          to="/dashboard"
-          onClick={() => setMenuOpen(false)}
-          className="text-2xl font-semibold text-white my-4"
-        >
-          Dashboard
-        </Link>
+        {authed ? (
+          <>
+            <Link
+              to="/dashboard"
+              onClick={close}
+              className="text-2xl font-semibold text-white my-4"
+            >
+              Dashboard
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="text-2xl font-semibold text-white my-4"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <Link
+            to="/login"
+            onClick={close}
+            className="text-2xl font-semibold text-white my-4"
+          >
+            Login
+          </Link>
+        )}
       </nav>
     </div>
   );
