@@ -1,5 +1,20 @@
 import { useId } from "react";
 
+/**
+ * @file MediaList component for managing a dynamic list of images.
+ * Allows adding, updating, and removing image entries with preview support.
+ */
+
+/**
+ * MediaList component.
+ *
+ * @component
+ * @param {Object} props
+ * @param {Array<{url: string, alt: string}>} props.items - Current list of media items.
+ * @param {(items: Array<{url: string, alt: string}>) => void} props.onChange - Callback invoked when list changes.
+ * @returns {JSX.Element} A form for managing a list of image URLs and alt text.
+ */
+
 export default function MediaList({ items, onChange }) {
   const id = useId();
 
@@ -59,7 +74,6 @@ export default function MediaList({ items, onChange }) {
             </button>
           </div>
 
-          {/* Preview */}
           {m.url ? (
             <div className="sm:col-span-12">
               <img

@@ -19,7 +19,7 @@ export default function CreateVenue() {
     description: "",
     price: "",
     maxGuests: "",
-    media: [{ url: "", alt: "" }], // multiple images
+    media: [{ url: "", alt: "" }],
     wifi: false,
     parking: false,
     breakfast: false,
@@ -38,7 +38,6 @@ export default function CreateVenue() {
     e.preventDefault();
     setErr("");
 
-    // Must be a venue manager
     try {
       const prof = await getProfile({ name: nameFromLS, accessToken, apiKey });
       if (!prof?.data?.venueManager) {
@@ -56,7 +55,6 @@ export default function CreateVenue() {
     if (!form.maxGuests || Number(form.maxGuests) < 1)
       return setErr("Max guests must be ≥ 1");
 
-    // Build media array (filter out empty rows, trim, keep max 8 for sanity)
     const media = (form.media || [])
       .map((m) => ({ url: m.url?.trim(), alt: (m.alt || form.name).trim() }))
       .filter((m) => !!m.url)
@@ -86,7 +84,7 @@ export default function CreateVenue() {
       setBusy(true);
       const res = await createVenue({ payload, accessToken, apiKey });
       const created = res?.data;
-      // Go to the newly created venue
+
       if (created?.id) {
         nav(`/venue/${created.id}`);
       } else {
@@ -148,7 +146,6 @@ export default function CreateVenue() {
           </label>
         </div>
 
-        {/* Multiple images */}
         <div>
           <h2 className="font-semibold text-black mb-2">Images</h2>
           <MediaList

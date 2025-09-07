@@ -2,17 +2,31 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthed, logout } from "../lib/session.js";
 
+/**
+ * @file Navbar component — top navigation bar with authentication-aware links.
+ * Syncs auth state across tabs and integrates with the mobile menu toggle.
+ */
+
+/**
+ * Navbar component.
+ *
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.menuOpen - Whether the mobile menu is currently open.
+ * @param {(open: boolean | ((prev: boolean) => boolean)) => void} [props.setMenuOpen] - Setter for toggling mobile menu state.
+ * @returns {JSX.Element} A fixed navigation bar with brand, links, and auth controls.
+ */
+
 export function Navbar({ menuOpen, setMenuOpen }) {
   const [authed, setAuthed] = useState(isAuthed());
   const navigate = useNavigate();
 
-  // Keep the navbar in sync if tokens change (e.g., login/logout in another tab)
   useEffect(() => {
     const onStorage = () => setAuthed(isAuthed());
     const onAuthChanged = () => setAuthed(isAuthed());
     window.addEventListener("storage", onStorage);
     window.addEventListener("auth:changed", onAuthChanged);
-    // also update on first mount just in case
+
     setAuthed(isAuthed());
     return () => {
       window.removeEventListener("storage", onStorage);
@@ -22,9 +36,9 @@ export function Navbar({ menuOpen, setMenuOpen }) {
 
   function handleLogout() {
     logout();
-    // close mobile menu if open
+
     setMenuOpen?.(false);
-    // send user to login (or home if you prefer)
+
     navigate("/login");
   }
 

@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 export default function LandingOnce() {
   const nav = useNavigate();
 
-  // If the user has already seen landing, redirect to /venues immediately
   useEffect(() => {
     const seen = localStorage.getItem("seenLanding");
     if (seen === "1") {

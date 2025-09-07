@@ -13,20 +13,16 @@ export default function Dashboard() {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // Avatar modal
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
 
-  // Manager disable confirm
   const [confirmOffOpen, setConfirmOffOpen] = useState(false);
 
-  // Delete venue confirm
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [venueToDelete, setVenueToDelete] = useState(null);
 
-  // View bookings modal
   const [bookingsOpen, setBookingsOpen] = useState(false);
-  const [bookingsVenue, setBookingsVenue] = useState(null); // { id, name }
+  const [bookingsVenue, setBookingsVenue] = useState(null);
   const [bookingsList, setBookingsList] = useState([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
   const [bookingsErr, setBookingsErr] = useState("");
@@ -35,7 +31,6 @@ export default function Dashboard() {
   const apiKey = getApiKey();
   const name = localStorage.getItem("profileName");
 
-  // Fetch profile (+ bookings, venues)
   useEffect(() => {
     let cancel = false;
     (async () => {
@@ -63,7 +58,6 @@ export default function Dashboard() {
     };
   }, [name, accessToken, apiKey]);
 
-  // Derived: upcoming bookings (future only, sorted asc)
   const upcoming = useMemo(() => {
     const now = Date.now();
     return (profile?.bookings || [])
@@ -71,7 +65,6 @@ export default function Dashboard() {
       .sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
   }, [profile]);
 
-  // Avatar save
   async function onAvatarSave() {
     try {
       setBusy(true);
@@ -97,7 +90,6 @@ export default function Dashboard() {
     }
   }
 
-  // Manager toggle (enable)
   async function enableManager() {
     try {
       setBusy(true);
@@ -122,7 +114,6 @@ export default function Dashboard() {
     }
   }
 
-  // Manager toggle (disable)
   async function disableManager() {
     try {
       setBusy(true);
@@ -148,7 +139,6 @@ export default function Dashboard() {
     }
   }
 
-  // Delete venue confirm
   async function onConfirmDelete() {
     if (!venueToDelete) return;
     try {
@@ -171,7 +161,6 @@ export default function Dashboard() {
     }
   }
 
-  // Open "View bookings" modal for a venue
   async function openBookingsForVenue(v) {
     setBookingsVenue({ id: v.id, name: v.name });
     setBookingsOpen(true);
@@ -202,7 +191,6 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">
-      {/* Profile header + manager controls */}
       <section className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 rounded-2xl bg-white border border-black/10 p-4">
         <div className="flex items-center gap-4">
           <img
@@ -226,7 +214,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Manager toggle + create button (if enabled) */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="text-black/70 text-sm">Venue manager:</span>
@@ -270,7 +257,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Upcoming bookings */}
       <section className="rounded-2xl bg-white border border-black/10 p-4">
         <h2 className="font-semibold mb-2 text-black">Upcoming bookings</h2>
         {!upcoming.length && (
@@ -303,7 +289,6 @@ export default function Dashboard() {
 
               <div className="mt-2 text-sm text-black">Guests: {b.guests}</div>
 
-              {/* Cancel button */}
               <button
                 onClick={async () => {
                   if (
@@ -314,7 +299,7 @@ export default function Dashboard() {
                     return;
                   try {
                     await cancelBooking({ id: b.id, accessToken, apiKey });
-                    // Refetch profile to refresh upcoming list
+
                     const res = await getProfile({
                       name,
                       accessToken,
@@ -337,7 +322,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* My venues (visible if manager) */}
       {profile.venueManager && (
         <section className="rounded-2xl bg-white border border-black/10 p-4">
           <div className="mb-3">
@@ -395,7 +379,6 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* Avatar Modal */}
       <Modal
         open={avatarOpen}
         onClose={() => setAvatarOpen(false)}
@@ -429,7 +412,6 @@ export default function Dashboard() {
         </label>
       </Modal>
 
-      {/* Confirm Disable Manager Modal */}
       <Modal
         open={confirmOffOpen}
         onClose={() => setConfirmOffOpen(false)}
@@ -459,7 +441,6 @@ export default function Dashboard() {
         </p>
       </Modal>
 
-      {/* Confirm Delete Venue Modal */}
       <Modal
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -489,7 +470,6 @@ export default function Dashboard() {
         </p>
       </Modal>
 
-      {/* View Bookings for a Venue Modal */}
       <Modal
         open={bookingsOpen}
         onClose={() => setBookingsOpen(false)}
@@ -521,8 +501,6 @@ export default function Dashboard() {
                     {new Date(b.dateTo).toISOString().slice(0, 10)}
                   </div>
                   <div className="text-black/80">Guests: {b.guests}</div>
-                  {/* If API includes customer info in booking, render it here */}
-                  {/* <div className="text-black/60">By: {b.customer?.name}</div> */}
                 </div>
               ))}
             </div>

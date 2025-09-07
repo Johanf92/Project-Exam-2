@@ -5,6 +5,19 @@ import {
   faTwitter,
 } from "@fortawesome/free-brands-svg-icons";
 
+/**
+ * @file Footer component with branding and social media links.
+ * Uses FontAwesome brand icons for Facebook, Instagram, and Twitter.
+ */
+
+/**
+ * Footer component.
+ *
+ * @component
+ * @returns {JSX.Element} Website footer with logo, copyright,
+ * and links to social media profiles.
+ */
+
 export default function Footer() {
   return (
     <footer className="bg-[rgba(10,10,10,0.8)] backdrop-blur-lg text-white py-6 mt-10 border-t border-white/10">

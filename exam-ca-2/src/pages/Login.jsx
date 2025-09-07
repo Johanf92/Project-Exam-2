@@ -16,21 +16,17 @@ export default function Login() {
       setBusy(true);
       const { data } = await login({ email, password });
 
-      // Store auth
       localStorage.setItem("accessToken", data?.accessToken);
       localStorage.setItem("profileName", data?.name);
 
-      // Ensure API key
       const keyResp = await createApiKey({
         accessToken: data?.accessToken,
         name: "Holidaze FE",
       });
       localStorage.setItem("apiKey", keyResp?.data?.key);
 
-      // Update global nav state
       window.dispatchEvent(new Event("auth:changed"));
 
-      // Go to dashboard
       nav("/dashboard");
     } catch (e) {
       setErr(e.message || "Login failed");
@@ -40,7 +36,6 @@ export default function Login() {
   }
 
   return (
-    // NOTE: no "min-h-screen" here — keeps the footer in view on short pages
     <div className="flex items-center justify-center p-6">
       <form
         onSubmit={onSubmit}

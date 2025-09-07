@@ -32,7 +32,7 @@ export default function Register() {
 
     try {
       setBusy(true);
-      // Register
+
       await register({
         name: name.trim(),
         email: email.trim(),
@@ -40,22 +40,18 @@ export default function Register() {
         venueManager,
       });
 
-      // Auto-login
       const { data } = await login({ email, password });
       localStorage.setItem("accessToken", data?.accessToken);
       localStorage.setItem("profileName", data?.name);
 
-      // API key
       const keyResp = await createApiKey({
         accessToken: data?.accessToken,
         name: "Holidaze FE",
       });
       localStorage.setItem("apiKey", keyResp?.data?.key);
 
-      // Sync nav state
       window.dispatchEvent(new Event("auth:changed"));
 
-      // Go dashboard
       nav("/dashboard");
     } catch (e) {
       setErr(e.message || "Registration failed");
@@ -65,7 +61,6 @@ export default function Register() {
   }
 
   return (
-    // NOTE: no "min-h-screen" — keeps footer visible without scrolling
     <div className="flex items-center justify-center p-6">
       <form
         onSubmit={onSubmit}

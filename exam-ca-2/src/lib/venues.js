@@ -71,7 +71,6 @@ export function createVenue({ payload, accessToken, apiKey }) {
   });
 }
 
-// Update a venue you manage
 export function updateVenue({ id, payload, accessToken, apiKey }) {
   return jfetch(`/holidaze/venues/${id}`, {
     method: "PUT",
@@ -80,7 +79,6 @@ export function updateVenue({ id, payload, accessToken, apiKey }) {
   });
 }
 
-// Delete a venue you manage
 export function deleteVenue({ id, accessToken, apiKey }) {
   return jfetch(`/holidaze/venues/${id}`, {
     method: "DELETE",

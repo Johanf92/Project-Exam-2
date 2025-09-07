@@ -12,10 +12,9 @@ export default function Home() {
   const [err, setErr] = useState("");
 
   const [page, setPage] = useState(1);
-  const [raw, setRaw] = useState([]); // accumulated pages
+  const [raw, setRaw] = useState([]);
   const [hasMore, setHasMore] = useState(true);
 
-  // URL params (single source of truth)
   const q = params.get("q") || "";
   const maxPrice = Number(params.get("max") || "") || 0;
   const guests = Number(params.get("guests") || "") || 0;
@@ -25,9 +24,8 @@ export default function Home() {
   const breakfast = params.get("breakfast") === "1";
   const pets = params.get("pets") === "1";
 
-  const sort = params.get("sort") || "created"; // created | price | rating
+  const sort = params.get("sort") || "created";
 
-  // Fetch on first load and when q or sort change
   useEffect(() => {
     let cancel = false;
 
@@ -38,14 +36,12 @@ export default function Home() {
         setHasMore(true);
         setPage(1);
 
-        // Server-side search + sort to reduce payload;
-        // we'll still filter/sort client-side for correctness.
         const res = await getVenues({
           page: 1,
           limit: PAGE_SIZE,
           q: q || undefined,
           sort,
-          // server order is fixed; client-side sort will ensure final order
+
           sortOrder: sort === "price" ? "asc" : "desc",
         });
 
@@ -65,7 +61,6 @@ export default function Home() {
     };
   }, [q, sort]);
 
-  // Load more pages
   async function loadMore() {
     try {
       setBusyMore(true);
@@ -88,11 +83,9 @@ export default function Home() {
     }
   }
 
-  // Client-side filters (including search fallback)
   const filtered = useMemo(() => {
     let list = raw.slice();
 
-    // robust search (fallback to client-side match)
     if (q.trim()) {
       const needle = q.trim().toLowerCase();
       list = list.filter((v) => {
@@ -109,17 +102,14 @@ export default function Home() {
       });
     }
 
-    // price / guests
     if (maxPrice) list = list.filter((v) => (v.price ?? 0) <= maxPrice);
     if (guests) list = list.filter((v) => (v.maxGuests ?? 0) >= guests);
 
-    // amenities
     if (wifi) list = list.filter((v) => v.meta?.wifi);
     if (parking) list = list.filter((v) => v.meta?.parking);
     if (breakfast) list = list.filter((v) => v.meta?.breakfast);
     if (pets) list = list.filter((v) => v.meta?.pets);
 
-    // final client-side sort for deterministic order
     const byCreatedDesc = (a, b) => new Date(b.created) - new Date(a.created);
     const byPriceAsc = (a, b) => (a.price ?? 0) - (b.price ?? 0);
     const byRatingDesc = (a, b) => (b.rating ?? 0) - (a.rating ?? 0);
@@ -131,7 +121,6 @@ export default function Home() {
     return list;
   }, [raw, q, maxPrice, guests, wifi, parking, breakfast, pets, sort]);
 
-  // Helpers to mutate URL params
   function updateParam(key, value) {
     const next = new URLSearchParams(params);
     if (value === "" || value === 0 || value === null || value === false) {
@@ -144,7 +133,7 @@ export default function Home() {
 
   function clearFilters() {
     const keep = new URLSearchParams();
-    // keep q & sort; wipe others
+
     if (q) keep.set("q", q);
     if (sort) keep.set("sort", sort);
     setParams(keep, { replace: true });
@@ -152,9 +141,7 @@ export default function Home() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Filters */}
       <section className="rounded-2xl bg-white border border-black/10 p-4 shadow-sm">
-        {/* Header row */}
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-black font-semibold">Find your stay</h2>
           <button
@@ -168,7 +155,6 @@ export default function Home() {
         </div>
 
         <form className="grid gap-3 md:grid-cols-12 items-end">
-          {/* Search */}
           <label className="block md:col-span-6">
             <span className="text-sm text-black/70">Search</span>
             <input
@@ -179,7 +165,6 @@ export default function Home() {
             />
           </label>
 
-          {/* Max price */}
           <label className="block md:col-span-3">
             <span className="text-sm text-black/70">Max price</span>
             <input
@@ -192,7 +177,6 @@ export default function Home() {
             />
           </label>
 
-          {/* Guests */}
           <label className="block md:col-span-3">
             <span className="text-sm text-black/70">Guests</span>
             <input
@@ -207,7 +191,6 @@ export default function Home() {
             />
           </label>
 
-          {/* Amenities */}
           <fieldset className="md:col-span-12 pt-2">
             <legend className="sr-only">Amenities</legend>
             <div className="flex flex-wrap gap-2">
@@ -267,7 +250,6 @@ export default function Home() {
         </form>
       </section>
 
-      {/* Results */}
       <section className="space-y-3">
         {loading && <div className="text-black">Loading venues…</div>}
         {err && <div className="text-red-600">{err}</div>}
@@ -284,7 +266,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Load more */}
         {!loading && hasMore && (
           <div className="flex justify-center">
             <button

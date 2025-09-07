@@ -1,11 +1,8 @@
 @import "tailwindcss";
 
-/* src/index.css */
-
-/* Global font styles */
 body {
   font-family: "Open Sans", sans-serif;
-  background-color: rgb(224, 224, 224); /* your dark theme base */
+  background-color: rgb(224, 224, 224);
   color: white;
 }
 

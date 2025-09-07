@@ -13,7 +13,6 @@ export default function Venue() {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // booking form
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [guests, setGuests] = useState(1);
@@ -28,7 +27,7 @@ export default function Venue() {
     (async () => {
       try {
         setLoading(true);
-        // includeBookings=true so the calendar can disable booked dates
+
         const res = await getVenueById({
           id,
           accessToken,
@@ -50,7 +49,7 @@ export default function Venue() {
   function toISO(dateStr) {
     if (!dateStr) return "";
     const [y, m, d] = dateStr.split("-").map(Number);
-    // midday -> avoids DST/tz edge cases
+
     return new Date(y, m - 1, d, 12, 0, 0).toISOString();
   }
 
@@ -78,7 +77,6 @@ export default function Venue() {
       return setErr(`Guests must be between 1 and ${max}.`);
     }
 
-    // Prevent overlaps before calling API (mirror server 409)
     const existing = venue?.bookings || [];
     const conflict = existing.some((b) =>
       overlaps(startISO, endISO, b.dateFrom, b.dateTo)
@@ -117,7 +115,6 @@ export default function Venue() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Hero */}
       <div className="rounded-2xl overflow-hidden border border-black/10 bg-white">
         <img
           src={hero}
@@ -126,7 +123,6 @@ export default function Venue() {
         />
       </div>
 
-      {/* Title + quick facts */}
       <section className="rounded-2xl bg-white border border-black/10 p-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
@@ -151,7 +147,6 @@ export default function Venue() {
           </div>
         </div>
 
-        {/* Amenities */}
         <div className="mt-3 flex flex-wrap gap-2 text-xs text-black">
           {meta.wifi && (
             <span className="px-2 py-1 rounded bg-black/5 border border-black/10">
@@ -175,12 +170,10 @@ export default function Venue() {
           )}
         </div>
 
-        {/* Description */}
         {venue.description && (
           <p className="mt-4 text-black leading-relaxed">{venue.description}</p>
         )}
 
-        {/* Gallery */}
         {venue.media?.length > 1 && (
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
             {venue.media.slice(1, 5).map((m, i) => (
@@ -196,7 +189,6 @@ export default function Venue() {
         )}
       </section>
 
-      {/* Availability */}
       <section className="rounded-2xl bg-white border border-black/10 p-4">
         <h2 className="font-semibold text-black mb-2 ">Availability</h2>
         <CalendarRange
@@ -212,7 +204,7 @@ export default function Venue() {
             setDateTo(range.to ? fmt(range.to) : "");
           }}
         />
-        {/* Optional compact list below the calendar */}
+
         {!!venue.bookings?.length && (
           <div className="text-xs text-black/70 mt-3">
             Unavailable:&nbsp;
@@ -226,7 +218,6 @@ export default function Venue() {
         )}
       </section>
 
-      {/* Booking form */}
       <section className="rounded-2xl bg-white border border-black/10 p-4">
         <form onSubmit={onBook} className="space-y-3">
           <h2 className="font-semibold text-black">Book this venue</h2>

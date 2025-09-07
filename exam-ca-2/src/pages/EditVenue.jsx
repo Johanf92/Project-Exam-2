@@ -22,7 +22,7 @@ export default function EditVenue() {
     description: "",
     price: "",
     maxGuests: "",
-    media: [{ url: "", alt: "" }], // multi
+    media: [{ url: "", alt: "" }],
     wifi: false,
     parking: false,
     breakfast: false,

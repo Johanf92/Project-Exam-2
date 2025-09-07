@@ -2,6 +2,21 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthed, logout } from "../lib/session.js";
 
+/**
+ * @file MobileMenu component — a full-screen overlay navigation for mobile devices.
+ * Handles authentication state changes and supports login/logout links.
+ */
+
+/**
+ * MobileMenu component.
+ *
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.menuOpen - Whether the mobile menu is currently open.
+ * @param {(open: boolean) => void} props.setMenuOpen - Function to toggle menu visibility.
+ * @returns {JSX.Element} A full-screen mobile navigation menu.
+ */
+
 export function MobileMenu({ menuOpen, setMenuOpen }) {
   const [authed, setAuthed] = useState(isAuthed());
   const navigate = useNavigate();
