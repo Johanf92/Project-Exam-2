@@ -1,12 +1,54 @@
-# React + Vite
+# Holidaze – Accommodation Booking Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React frontend for **Holidaze**, an accommodation booking platform.  
+Users can search venues, make bookings, and manage their profile. Venue managers can create, edit, and delete venues, as well as view bookings.
 
-Currently, two official plugins are available:
+This project was built as my final frontend exam at Noroff.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🚀 Demo
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Hosted on **Netlify**: [Live demo here](https://your-site.netlify.app)
+
+---
+
+## ✨ Features
+
+### Customer
+
+- 🔍 View and search venues (by name, city, country, price, and guests)
+- 📅 See venue availability with a calendar
+- 🛎️ Create bookings
+- 📖 View and cancel upcoming bookings
+- 🖼️ Update profile avatar
+- 👤 Register and login with a `stud.noroff.no` email
+
+### Venue Manager
+
+- 🏨 Enable manager role on profile
+- ➕ Create new venues with multiple images
+- ✏️ Edit and delete own venues
+- 📋 View bookings for each venue
+
+### Shared
+
+- 🔐 Secure authentication with Noroff API v2
+- 🖤 Clean, responsive UI built with TailwindCSS
+- 📱 Fully responsive layout (mobile → desktop)
+
+---
+
+## 🛠️ Tech Stack
+
+- **React 19** + **React Router 7** – SPA routing and state management
+- **Vite 7** – lightning-fast dev server and build tool
+- **TailwindCSS 4** – utility-first styling
+- **React Day Picker** – date range selection
+- **Font Awesome & React Icons** – icons
+- **Netlify** – hosting and deployment
+- **Noroff API v2 (Holidaze)** – backend services
+
+---
+
+## 📂 Project Structure

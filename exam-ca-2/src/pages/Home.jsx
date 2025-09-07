@@ -152,14 +152,27 @@ export default function Home() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Filter + Sort bar */}
-      <section className="rounded-2xl bg-white border border-black/10 p-4">
+      {/* Filters */}
+      <section className="rounded-2xl bg-white border border-black/10 p-4 shadow-sm">
+        {/* Header row */}
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-black font-semibold">Find your stay</h2>
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="px-3 py-2 rounded-md border border-black/20 text-black text-sm hover:bg-black/5 transition"
+            title="Clear filters (keeps search term empty)"
+          >
+            Clear
+          </button>
+        </div>
+
         <form className="grid gap-3 md:grid-cols-12 items-end">
           {/* Search */}
-          <label className="block md:col-span-5 text-black">
-            <span className="text-sm">Search</span>
+          <label className="block md:col-span-6">
+            <span className="text-sm text-black/70">Search</span>
             <input
-              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
+              className="mt-1 w-full rounded-md border border-black/20 bg-white text-black px-3 py-2 outline-none focus:ring-2 focus:ring-yellow-300"
               placeholder="Search by name, city, country…"
               value={q}
               onChange={(e) => updateParam("q", e.target.value)}
@@ -167,97 +180,88 @@ export default function Home() {
           </label>
 
           {/* Max price */}
-          <label className="block md:col-span-2 text-black">
-            <span className="text-sm">Max price</span>
+          <label className="block md:col-span-3">
+            <span className="text-sm text-black/70">Max price</span>
             <input
               type="number"
               min={0}
-              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
+              className="mt-1 w-full rounded-md border border-black/20 bg-white text-black px-3 py-2 outline-none focus:ring-2 focus:ring-yellow-300"
               value={maxPrice || ""}
               onChange={(e) => updateParam("max", Number(e.target.value || 0))}
+              placeholder="e.g. 1500"
             />
           </label>
 
           {/* Guests */}
-          <label className="block md:col-span-2 text-black">
-            <span className="text-sm">Guests</span>
+          <label className="block md:col-span-3">
+            <span className="text-sm text-black/70">Guests</span>
             <input
               type="number"
               min={0}
-              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
+              className="mt-1 w-full rounded-md border border-black/20 bg-white text-black px-3 py-2 outline-none focus:ring-2 focus:ring-yellow-300"
               value={guests || ""}
               onChange={(e) =>
                 updateParam("guests", Number(e.target.value || 0))
               }
+              placeholder="e.g. 4"
             />
           </label>
 
-          {/* Sort (fixed order based on option) */}
-          <label className="block md:col-span-3 text-black">
-            <span className="text-sm">Sort</span>
-            <select
-              value={sort}
-              onChange={(e) => updateParam("sort", e.target.value)}
-              className="mt-1 w-full border border-black/20 bg-white text-black px-3 py-2 rounded"
-            >
-              <option value="created">Newest</option>
-              <option value="price">Price (low → high)</option>
-              <option value="rating">Rating (high → low)</option>
-            </select>
-          </label>
-
           {/* Amenities */}
-          <fieldset className="md:col-span-12 grid grid-cols-2 sm:grid-cols-5 gap-2 text-black pt-2">
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={wifi}
-                onChange={(e) =>
-                  updateParam("wifi", e.target.checked ? "1" : "")
-                }
-              />
-              <span>Wi-Fi</span>
-            </label>
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={parking}
-                onChange={(e) =>
-                  updateParam("parking", e.target.checked ? "1" : "")
-                }
-              />
-              <span>Parking</span>
-            </label>
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={breakfast}
-                onChange={(e) =>
-                  updateParam("breakfast", e.target.checked ? "1" : "")
-                }
-              />
-              <span>Breakfast</span>
-            </label>
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={pets}
-                onChange={(e) =>
-                  updateParam("pets", e.target.checked ? "1" : "")
-                }
-              />
-              <span>Pets</span>
-            </label>
+          <fieldset className="md:col-span-12 pt-2">
+            <legend className="sr-only">Amenities</legend>
+            <div className="flex flex-wrap gap-2">
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={wifi}
+                  onChange={(e) =>
+                    updateParam("wifi", e.target.checked ? "1" : "")
+                  }
+                />
+                <span className="px-3 py-1.5 rounded-full border border-black/15 bg-black/5 text-black text-sm">
+                  Wi-Fi
+                </span>
+              </label>
 
-            <div className="flex justify-end md:col-span-1">
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="px-3 py-2 rounded border border-black/20 text-black"
-                title="Clear filters (keeps search & sort)"
-              >
-                Clear
-              </button>
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={parking}
+                  onChange={(e) =>
+                    updateParam("parking", e.target.checked ? "1" : "")
+                  }
+                />
+                <span className="px-3 py-1.5 rounded-full border border-black/15 bg-black/5 text-black text-sm">
+                  Parking
+                </span>
+              </label>
+
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={breakfast}
+                  onChange={(e) =>
+                    updateParam("breakfast", e.target.checked ? "1" : "")
+                  }
+                />
+                <span className="px-3 py-1.5 rounded-full border border-black/15 bg-black/5 text-black text-sm">
+                  Breakfast
+                </span>
+              </label>
+
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={pets}
+                  onChange={(e) =>
+                    updateParam("pets", e.target.checked ? "1" : "")
+                  }
+                />
+                <span className="px-3 py-1.5 rounded-full border border-black/15 bg-black/5 text-black text-sm">
+                  Pets
+                </span>
+              </label>
             </div>
           </fieldset>
         </form>
