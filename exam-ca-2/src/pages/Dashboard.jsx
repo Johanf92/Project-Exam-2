@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAccessToken, getApiKey } from "../lib/session.js";
@@ -312,7 +311,7 @@ export default function Dashboard() {
                     alert(e.message || "Failed to cancel booking");
                   }
                 }}
-                className="mt-auto px-3 py-1.5 rounded bg-black text-white cursor-pointer text-sm
+                className="mt-auto px-3 py-1.5 rounded bg-black text-red-500 cursor-pointer text-sm
                hover:bg-black/80 active:scale-95 transition disabled:opacity-60"
               >
                 Cancel booking
@@ -362,7 +361,7 @@ export default function Dashboard() {
                       setVenueToDelete(v);
                       setDeleteOpen(true);
                     }}
-                    className="px-3 py-1.5 rounded bg-black text-white cursor-pointer text-sm"
+                    className="px-3 py-1.5 rounded bg-black text-red-500 cursor-pointer text-sm"
                   >
                     Delete
                   </button>
